@@ -6,6 +6,8 @@ using UnityEngine;
 public class SwordAction : BaseAction
 {
 
+    [SerializeField] private bool shouldNotDamage;
+
     public static event EventHandler OnAnySwordHit;
 
     public event EventHandler OnSwordActionStarted;
@@ -59,7 +61,7 @@ public class SwordAction : BaseAction
                 state = State.SwingingSwordAfterHit;
                 float afterHitStateTime = 0.5f;
                 stateTimer = afterHitStateTime;
-                targetUnit.Damage(100);
+                targetUnit.Damage(shouldNotDamage ? 0:100);
                 OnAnySwordHit?.Invoke(this, EventArgs.Empty);
                 break;
             case State.SwingingSwordAfterHit:
@@ -127,7 +129,7 @@ public class SwordAction : BaseAction
         targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(gridPosition);
 
         state = State.SwingingSwordBeforeHit;
-        float beforeHitStateTime = 0.7f;
+        float beforeHitStateTime = 1f;
         stateTimer = beforeHitStateTime;
 
         OnSwordActionStarted?.Invoke(this, EventArgs.Empty);
@@ -138,6 +140,11 @@ public class SwordAction : BaseAction
     public int GetMaxSwordDistance()
     {
         return maxSwordDistance;
+    }
+    
+    public Unit GetTargetUnit()
+    {
+        return targetUnit;
     }
 
 }

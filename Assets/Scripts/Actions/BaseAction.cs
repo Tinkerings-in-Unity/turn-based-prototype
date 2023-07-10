@@ -6,6 +6,8 @@ using UnityEngine;
 public abstract class BaseAction : MonoBehaviour
 {
 
+    [SerializeField] protected List<int> cameraPreferenceList;
+    
     public static event EventHandler OnAnyActionStarted;
     public static event EventHandler OnAnyActionCompleted;
 
@@ -34,6 +36,11 @@ public abstract class BaseAction : MonoBehaviour
     public virtual int GetActionPointsCost()
     {
         return 1;
+    }
+    
+    public List<int> GetPreferredCameras()
+    {
+        return cameraPreferenceList;
     }
 
     protected void ActionStart(Action onActionComplete)

@@ -26,10 +26,32 @@ public class UnitActionSystemUI : MonoBehaviour
         UnitActionSystem.Instance.OnActionStarted += UnitActionSystem_OnActionStarted;
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
         Unit.OnAnyActionPointsChanged += Unit_OnAnyActionPointsChanged;
+        UnitActionSystem.Instance.OnBusyChanged += UnitActionSystem_OnBusyChanged;
 
         UpdateActionPoints();
         CreateUnitActionButtons();
         UpdateSelectedVisual();
+    }
+    
+    private void Show()
+    {
+        gameObject.SetActive(true);
+    }
+
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+    
+    private void UnitActionSystem_OnBusyChanged(object sender, bool isBusy)
+    {
+        if (isBusy)
+        {
+            Hide();
+        } else
+        {
+            Show();
+        }
     }
 
 

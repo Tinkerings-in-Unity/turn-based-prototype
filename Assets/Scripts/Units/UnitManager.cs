@@ -6,6 +6,7 @@ using UnityEngine;
 public class UnitManager : MonoBehaviour
 {
 
+    public event EventHandler OnUnitManagerReady;
     public static UnitManager Instance { get; private set; }
 
 
@@ -79,6 +80,21 @@ public class UnitManager : MonoBehaviour
     public List<Unit> GetEnemyUnitList()
     {
         return enemyUnitList;
+    }
+    
+    public Unit GetPlayer()
+    {
+        foreach (var unit in friendlyUnitList)
+        {
+            if(!unit.IsPlayer())
+            {
+                continue;
+            }
+
+            return unit;
+        }
+
+        return null;
     }
 
 }

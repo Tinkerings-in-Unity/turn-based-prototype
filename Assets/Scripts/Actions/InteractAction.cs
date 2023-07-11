@@ -8,6 +8,9 @@ public class InteractAction : BaseAction
 
     private int maxInteractDistance = 1;
 
+    public override void Setup()
+    {
+    }
 
     private void Update()
     {

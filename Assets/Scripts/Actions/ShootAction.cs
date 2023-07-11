@@ -28,12 +28,13 @@ public class ShootAction : BaseAction
     [SerializeField] private LayerMask obstaclesLayerMask;
 
     private State state;
-    private int maxShootDistance = 7;
+    private int _range;
+    private int _damage;
     private float stateTimer;
     private Unit targetUnit;
     private bool canShootBullet;
-
-
+    private Weapon _weapon;
+    
     private void Update()
     {
         if (!isActive)
@@ -67,6 +68,14 @@ public class ShootAction : BaseAction
         {
             NextState();
         }
+    }
+    
+    public override void Setup()
+    {
+        _weapon = unit.GetSelectedWeapon();
+
+        _damage = _weapon.GetDamage();
+        _range = _weapon.GetRange();
     }
 
     private void NextState()
@@ -102,10 +111,8 @@ public class ShootAction : BaseAction
             shootingUnit = unit
         });
         
-        targetUnit.Damage(40);
+        targetUnit.Damage(_damage);
     }
-
-
 
     public override string GetActionName()
     {
@@ -118,15 +125,17 @@ public class ShootAction : BaseAction
         return GetValidActionGridPositionList(unitGridPosition);
     }
 
+    
+
     public List<GridPosition> GetValidActionGridPositionList(GridPosition unitGridPosition)
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
-        for (int x = -maxShootDistance; x <= maxShootDistance; x++)
+        for (int x = -_range; x <= _range; x++)
         {
-            for (int z = -maxShootDistance; z <= maxShootDistance; z++)
+            for (int z = -_range; z <= _range; z++)
             {
-                for (int floor = -maxShootDistance; floor <= maxShootDistance; floor++)
+                for (int floor = -_range; floor <= _range; floor++)
                 {
                     GridPosition offsetGridPosition = new GridPosition(x, z, floor);
                     GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
@@ -137,7 +146,7 @@ public class ShootAction : BaseAction
                     }
 
                     int testDistance = Mathf.Abs(x) + Mathf.Abs(z);
-                    if (testDistance > maxShootDistance)
+                    if (testDistance > _range)
                     {
                         continue;
                     }
@@ -198,7 +207,7 @@ public class ShootAction : BaseAction
 
     public int GetMaxShootDistance()
     {
-        return maxShootDistance;
+        return _range;
     }
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)

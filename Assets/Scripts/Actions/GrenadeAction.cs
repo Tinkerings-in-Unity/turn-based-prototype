@@ -20,6 +20,10 @@ public class GrenadeAction : BaseAction
         }
     }
 
+    public override void Setup()
+    {
+    }
+
 
     public override string GetActionName()
     {

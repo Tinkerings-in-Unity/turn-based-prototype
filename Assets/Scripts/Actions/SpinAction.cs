@@ -8,7 +8,10 @@ public class SpinAction : BaseAction
 
     private float totalSpinAmount;
 
-
+    public override void Setup()
+    {
+    }
+    
     private void Update()
     {
         if (!isActive)

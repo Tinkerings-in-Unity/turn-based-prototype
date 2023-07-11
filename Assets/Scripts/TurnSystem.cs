@@ -27,6 +27,16 @@ public class TurnSystem : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        BaseAction.OnAnyActionCompleted += BaseAction_OnAnyActionCompleted;
+    }
+
+    private void BaseAction_OnAnyActionCompleted(object sender, EventArgs e)
+    {
+        // NextTurn();
+    }
+
 
     public void NextTurn()
     {

@@ -68,6 +68,7 @@ public class GridSystemVisual : MonoBehaviour
         }
 
         UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
+        UnitActionSystem.Instance.OnSelectedEquipmentActionChanged += UnitActionSystem_OnSelectedEquipmentActionChanged;
         UnitActionSystem.Instance.OnBusyChanged += UnitActionSystem_OnBusyChanged;
         //LevelGrid.Instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMovedGridPosition;
 
@@ -153,6 +154,7 @@ public class GridSystemVisual : MonoBehaviour
 
         Unit selectedUnit = UnitActionSystem.Instance.GetSelectedUnit();
         BaseAction selectedAction = UnitActionSystem.Instance.GetSelectedAction();
+        selectedAction.Setup();
 
         GridVisualType gridVisualType;
 
@@ -189,10 +191,22 @@ public class GridSystemVisual : MonoBehaviour
 
     private void UnitActionSystem_OnBusyChanged(object sender, bool e)
     {
-        UpdateGridVisual();
+        if (e)
+        {
+            HideAllGridPosition();
+        } else
+        {
+            UpdateGridVisual();
+
+        }
     }
 
     private void UnitActionSystem_OnSelectedActionChanged(object sender, EventArgs e)
+    {
+        UpdateGridVisual();
+    }
+    
+    private void UnitActionSystem_OnSelectedEquipmentActionChanged(object sender, EventArgs e)
     {
         UpdateGridVisual();
     }

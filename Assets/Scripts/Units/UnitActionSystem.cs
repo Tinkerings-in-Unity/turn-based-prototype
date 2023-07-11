@@ -4,6 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+public enum EquipmentAction
+{
+    WeaponOne,
+    WeaponTwo,
+    Backpack
+} 
+
 public class UnitActionSystem : MonoBehaviour
 {
 
@@ -12,12 +19,15 @@ public class UnitActionSystem : MonoBehaviour
 
     public event EventHandler OnSelectedUnitChanged;
     public event EventHandler OnSelectedActionChanged;
+    public event EventHandler OnSelectedEquipmentActionChanged;
     public event EventHandler<bool> OnBusyChanged;
     public event EventHandler OnActionStarted;
 
 
     [SerializeField] private Unit selectedUnit;
     [SerializeField] private LayerMask unitLayerMask;
+
+    private EquipmentAction _selectedEquipmentAction;
 
     private BaseAction selectedAction;
     private bool isBusy;
@@ -75,10 +85,10 @@ public class UnitActionSystem : MonoBehaviour
                 return;
             }
 
-            if (!selectedUnit.TrySpendActionPointsToTakeAction(selectedAction))
-            {
-                return;
-            }
+            // if (!selectedUnit.TrySpendActionPointsToTakeAction(selectedAction))
+            // {
+            //     return;
+            // }
 
             SetBusy();
             selectedAction.TakeAction(mouseGridPosition, ClearBusy);
@@ -137,6 +147,8 @@ public class UnitActionSystem : MonoBehaviour
         selectedUnit = unit;
 
         SetSelectedAction(unit.GetAction<MoveAction>());
+        
+        SetSelectedEquipmentAction(EquipmentAction.WeaponOne);
 
         OnSelectedUnitChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -145,7 +157,16 @@ public class UnitActionSystem : MonoBehaviour
     {
         selectedAction = baseAction;
 
+        selectedAction.Setup();
+
         OnSelectedActionChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void SetSelectedEquipmentAction(EquipmentAction equipmentAction)
+    {
+        _selectedEquipmentAction = equipmentAction;
+        
+        OnSelectedEquipmentActionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public Unit GetSelectedUnit()
@@ -156,6 +177,11 @@ public class UnitActionSystem : MonoBehaviour
     public BaseAction GetSelectedAction()
     {
         return selectedAction;
+    }
+    
+    public EquipmentAction GetSelectedEquipmentAction()
+    {
+        return _selectedEquipmentAction;
     }
 
 }

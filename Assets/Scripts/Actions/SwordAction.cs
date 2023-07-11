@@ -52,6 +52,11 @@ public class SwordAction : BaseAction
             NextState();
         }
     }
+    
+    public override void Setup()
+    {
+        
+    }
 
     private void NextState()
     {

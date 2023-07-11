@@ -7,14 +7,14 @@ using TMPro;
 public class ActionButtonUI : MonoBehaviour
 {
 
-    [SerializeField] private TextMeshProUGUI textMeshPro;
-    [SerializeField] private Button button;
-    [SerializeField] private GameObject selectedGameObject;
+    [SerializeField] protected TextMeshProUGUI textMeshPro;
+    [SerializeField] protected Button button;
+    [SerializeField] protected GameObject selectedGameObject;
 
 
     private BaseAction baseAction;
 
-    public void SetBaseAction(BaseAction baseAction)
+    public virtual void SetBaseAction(BaseAction baseAction)
     {
         this.baseAction = baseAction;
         textMeshPro.text = baseAction.GetActionName().ToUpper();
@@ -24,7 +24,7 @@ public class ActionButtonUI : MonoBehaviour
         });
     }
 
-    public void UpdateSelectedVisual()
+    public virtual void UpdateSelectedVisual()
     {
         BaseAction selectedBaseAction = UnitActionSystem.Instance.GetSelectedAction();
         selectedGameObject.SetActive(selectedBaseAction == baseAction);

@@ -4,25 +4,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Utility;
 
 public class UnitActionSystemUI : MonoBehaviour
 {
 
     [SerializeField] private Transform actionButtonPrefab;
     [SerializeField] private Transform actionButtonContainerTransform;
+    [SerializeField] private Transform equipmentActionButtonContainerTransform;
     [SerializeField] private TextMeshProUGUI actionPointsText;
 
     private List<ActionButtonUI> actionButtonUIList;
+    private List<EquipmentActionButtonUI> _equipmentActionButtonUIList;
+    
+    public static UnitActionSystemUI Instance { get; private set; }
 
     private void Awake()
     {
+        if (Instance != null)
+        {
+            Debug.LogError("There's more than one UnitActionSystem! " + transform + " - " + Instance);
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        
         actionButtonUIList = new List<ActionButtonUI>();
+        _equipmentActionButtonUIList = new List<EquipmentActionButtonUI>();
     }
 
     private void Start()
     {
         UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
         UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
+        UnitActionSystem.Instance.OnSelectedEquipmentActionChanged += UnitActionSystem_OnSelectedEquipmentActionChanged;
         UnitActionSystem.Instance.OnActionStarted += UnitActionSystem_OnActionStarted;
         TurnSystem.Instance.OnTurnChanged += TurnSystem_OnTurnChanged;
         Unit.OnAnyActionPointsChanged += Unit_OnAnyActionPointsChanged;
@@ -74,6 +89,11 @@ public class UnitActionSystemUI : MonoBehaviour
 
             actionButtonUIList.Add(actionButtonUI);
         }
+        
+        foreach (Transform equipmentButtonTransform  in equipmentActionButtonContainerTransform)
+        {
+            equipmentButtonTransform.GetComponent<EquipmentActionButtonUI>().Setup();
+        }
     }
 
     private void UnitActionSystem_OnSelectedUnitChanged(object sender, EventArgs e)
@@ -84,6 +104,11 @@ public class UnitActionSystemUI : MonoBehaviour
     }
 
     private void UnitActionSystem_OnSelectedActionChanged(object sender, EventArgs e)
+    {
+        UpdateSelectedVisual();
+    }
+    
+    private void UnitActionSystem_OnSelectedEquipmentActionChanged(object sender, EventArgs e)
     {
         UpdateSelectedVisual();
     }
@@ -99,6 +124,8 @@ public class UnitActionSystemUI : MonoBehaviour
         {
             actionButtonUI.UpdateSelectedVisual();
         }
+        
+        _equipmentActionButtonUIList.ForEach(b => b.UpdateSelectedVisual());
     }
 
     private void UpdateActionPoints()
@@ -116,6 +143,11 @@ public class UnitActionSystemUI : MonoBehaviour
     private void Unit_OnAnyActionPointsChanged(object sender, EventArgs e)
     {
         UpdateActionPoints();
+    }
+
+    public void RegisterEquipmentActionButton(EquipmentActionButtonUI equipmentActionButtonUI)
+    {
+       _equipmentActionButtonUIList.Add(equipmentActionButtonUI);
     }
     
 }

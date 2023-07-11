@@ -25,6 +25,10 @@ public class MoveAction : BaseAction
     private float differentFloorsTeleportTimer;
     private float differentFloorsTeleportTimerMax = .5f;
 
+    public override void Setup()
+    {
+    }
+    
     private void Update()
     {
         if (!isActive)

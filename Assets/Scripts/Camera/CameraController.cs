@@ -12,9 +12,11 @@ public class CameraController : MonoBehaviour
     public static CameraController Instance { get; private set; }
 
     [SerializeField] private CinemachineVirtualCamera cinemachineVirtualCamera;
+    [SerializeField] private Transform followTransform;
 
     private CinemachineTransposer cinemachineTransposer;
     private Vector3 targetFollowOffset;
+    private List<ObjectVisibility> _raycastHitObjects = new List<ObjectVisibility>();
 
     private void Awake()
     {
@@ -36,12 +38,14 @@ public class CameraController : MonoBehaviour
 
     private void HandleMovement()
     {
-        Vector2 inputMoveDir = InputManager.Instance.GetCameraMoveVector();
-
-        float moveSpeed = 10f;
-
-        Vector3 moveVector = transform.forward * inputMoveDir.y + transform.right * inputMoveDir.x;
-        transform.position += moveVector * moveSpeed * Time.deltaTime;
+        transform.position = followTransform.position;
+        ToggleOccludingObjectsVisibilityOff();
+        // Vector2 inputMoveDir = InputManager.Instance.GetCameraMoveVector();
+        //
+        // float moveSpeed = 10f;
+        //
+        // Vector3 moveVector = transform.forward * inputMoveDir.y + transform.right * inputMoveDir.x;
+        // transform.position += moveVector * moveSpeed * Time.deltaTime;
     }
 
     private void HandleRotation()
@@ -69,6 +73,41 @@ public class CameraController : MonoBehaviour
     public float GetCameraHeight()
     {
         return targetFollowOffset.y;
+    }
+    
+    private void ToggleOccludingObjectsVisibilityOff()
+    {
+        if (_raycastHitObjects.Count > 0)
+        {
+            foreach (var raycastHitObject in _raycastHitObjects)
+            {
+                raycastHitObject.Show();
+            }
+            _raycastHitObjects.Clear();
+        }
+        
+        Ray ray = Camera.main.ScreenPointToRay(InputManager.Instance.GetMouseScreenPosition());
+        var cameraPosition = Camera.main.transform.position;
+        var direction = followTransform.position - cameraPosition;
+        var distance = (direction).magnitude;
+        direction = direction.normalized;
+        RaycastHit[] raycastHitArray = Physics.RaycastAll(cameraPosition, direction, distance);
+        Debug.DrawRay(cameraPosition, direction * distance, Color.magenta);
+        System.Array.Sort(raycastHitArray,
+            (RaycastHit raycastHitA, RaycastHit raycastHitB) =>
+            {
+                return Mathf.RoundToInt(raycastHitA.distance - raycastHitB.distance);
+            });
+
+        foreach (RaycastHit raycastHit in raycastHitArray)
+        {
+            if (raycastHit.transform.TryGetComponent(out ObjectVisibility objectVisibility))
+            {
+                _raycastHitObjects.Add(objectVisibility);
+                objectVisibility.Hide();
+            }
+        }
+            
     }
 
 }

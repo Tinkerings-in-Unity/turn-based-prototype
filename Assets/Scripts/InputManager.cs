@@ -37,19 +37,29 @@ public class InputManager : MonoBehaviour
 
     public bool IsMouseButtonDownThisFrame()
     {
-#if USE_NEW_INPUT_SYSTEM
-        return playerInputActions.Player.Click.WasPressedThisFrame();
-#else
+// #if USE_NEW_INPUT_SYSTEM
+//         return playerInputActions.Player.Click.WasPressedThisFrame();
+// #else
         return Input.GetMouseButtonDown(0);
-#endif
+// #endif
     }
 
-    public Vector2 GetCameraMoveVector()
+    public Vector2 GetCameraMoveVector(out bool mouseHeld)
     {
-#if USE_NEW_INPUT_SYSTEM
-        return playerInputActions.Player.CameraMovement.ReadValue<Vector2>();
-#else
         Vector2 inputMoveDir = new Vector2(0, 0);
+        mouseHeld = false;
+        
+        if (Input.GetMouseButton(2))
+        {
+            mouseHeld = true;
+            var xValue = Input.GetAxis("Mouse X");
+            var yValue = Input.GetAxis("Mouse Y");
+            var xSign = Mathf.Sign(xValue);
+            var ySign = Mathf.Sign(yValue);
+            
+            inputMoveDir.y = Mathf.Abs(yValue) > 0f ? ySign * 1f : 0f;
+            inputMoveDir.x = Mathf.Abs(xValue) > 0f ? xSign * 1f : 0f;
+        }
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -69,15 +79,21 @@ public class InputManager : MonoBehaviour
         }
 
         return inputMoveDir;
-#endif
     }
 
     public float GetCameraRotateAmount()
     {
-#if USE_NEW_INPUT_SYSTEM
-        return playerInputActions.Player.CameraRotate.ReadValue<float>();
-#else
+// #if USE_NEW_INPUT_SYSTEM
+//         return playerInputActions.Player.CameraRotate.ReadValue<float>();
+// #else
         float rotateAmount = 0f;
+
+        if (Input.GetMouseButton(1))
+        {
+            var value = Input.GetAxis("Mouse X");
+            var sign = Mathf.Sign(value);
+            rotateAmount = Mathf.Abs(value) > 0f ? sign * 1f : 0f;
+        }
 
         if (Input.GetKey(KeyCode.Q))
         {
@@ -89,7 +105,7 @@ public class InputManager : MonoBehaviour
         }
 
         return rotateAmount;
-#endif
+// #endif
     }
 
     public float GetCameraZoomAmount()

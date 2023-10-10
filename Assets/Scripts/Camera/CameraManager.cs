@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
-using JohnStairs.RCC.Character;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -20,7 +19,6 @@ public class CameraManager : MonoBehaviour
     
     public List<string> TagsForFading = new List<string>() { "FadeOut" };
 
-    private RPGViewFrustum _rpgViewFrustum;
     private List<ObjectVisibility> _raycastHitObjects = new List<ObjectVisibility>();
 
     enum CameraChoice
@@ -28,11 +26,6 @@ public class CameraManager : MonoBehaviour
         Camera1,
         Camera2,
         Camera3
-    }
-
-    private void Awake()
-    {
-        _rpgViewFrustum = GetComponent<RPGViewFrustum>();
     }
 
     private void Start()

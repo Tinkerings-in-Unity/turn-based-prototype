@@ -23,7 +23,7 @@ public class ObjectVisibility : MonoBehaviour
     {
         foreach (Renderer renderer in _rendererList)
         {
-            if (ignoreRendererList.Contains(renderer))
+            if (ignoreRendererList.Contains(renderer) || renderer == null)
             {
                 continue;
             }
@@ -35,7 +35,7 @@ public class ObjectVisibility : MonoBehaviour
     {
         foreach (Renderer renderer in _rendererList)
         {
-            if (ignoreRendererList.Contains(renderer))
+            if (ignoreRendererList.Contains(renderer) || renderer == null)
             {
                 continue;
             }

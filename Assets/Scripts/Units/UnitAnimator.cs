@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CoverSystem;
 using UnityEngine;
 
 public class UnitAnimator : MonoBehaviour
@@ -32,6 +33,12 @@ public class UnitAnimator : MonoBehaviour
             swordAction.OnSwordActionStarted += SwordAction_OnSwordActionStarted;
             swordAction.OnSwordActionCompleted += SwordAction_OnSwordActionCompleted;
         }
+
+        if (TryGetComponent<CoverAbility>(out CoverAbility coverAbility))
+        {
+            coverAbility.OnInCover += CoverAbility_OnInCover;
+            coverAbility.OnOutOfCover += CoverAbility_OnOutOfCover;
+        }
     }
 
     private void MoveAction_OnChangedFloorsStarted(object sender, MoveAction.OnChangeFloorsStartedEventArgs e)
@@ -39,11 +46,11 @@ public class UnitAnimator : MonoBehaviour
         if (e.targetGridPosition.floor > e.unitGridPosition.floor)
         {
             // Jump
-            animator.SetTrigger("JumpUp");
+            animator.SetTrigger("JumpUp"); //climb up
         } else
         {
             // Drop
-            animator.SetTrigger("JumpDown");
+            animator.SetTrigger("JumpDown"); //climb down
         }
     }
 
@@ -88,6 +95,16 @@ public class UnitAnimator : MonoBehaviour
         targetUnitShootAtPosition.y += unitShoulderHeight;
 
         bulletProjectile.Setup(targetUnitShootAtPosition);
+    }
+
+    private void CoverAbility_OnInCover(object sender, EventArgs e)
+    {
+        
+    }
+    
+    private void CoverAbility_OnOutOfCover(object sender, EventArgs e)
+    {
+        
     }
 
     private void EquipSword()

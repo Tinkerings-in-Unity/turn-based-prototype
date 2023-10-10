@@ -13,6 +13,7 @@ public class CameraController : MonoBehaviour
 
     [SerializeField] private CinemachineVirtualCamera cinemachineVirtualCamera;
     [SerializeField] private Transform followTransform;
+    [SerializeField] private float followSpeed = 15f;
 
     private CinemachineTransposer cinemachineTransposer;
     private Vector3 targetFollowOffset;
@@ -38,14 +39,37 @@ public class CameraController : MonoBehaviour
 
     private void HandleMovement()
     {
-        transform.position = followTransform.position;
+        // transform.position = Vector3.Slerp(transform.position, followTransform.position, followSpeed * Time.deltaTime);
         ToggleOccludingObjectsVisibilityOff();
-        // Vector2 inputMoveDir = InputManager.Instance.GetCameraMoveVector();
-        //
-        // float moveSpeed = 10f;
-        //
-        // Vector3 moveVector = transform.forward * inputMoveDir.y + transform.right * inputMoveDir.x;
-        // transform.position += moveVector * moveSpeed * Time.deltaTime;
+        Vector2 inputMoveDir = InputManager.Instance.GetCameraMoveVector(out var mouseButtonHeld);
+        
+        float moveSpeed = 10f;
+        var moved = false;
+        
+        Vector3 moveVector = transform.forward * inputMoveDir.y + transform.right * inputMoveDir.x;
+
+        if (moveVector == Vector3.zero)
+        {
+            if(!mouseButtonHeld)
+            {
+                if (Mathf.Abs(Vector3.Distance(transform.position, followTransform.position)) > 1f)
+                {
+                    transform.position = Vector3.Slerp(transform.position, followTransform.position,
+                        (followSpeed * 0.1f) * Time.deltaTime);
+                }
+                else
+                {
+                    transform.position = Vector3.Slerp(transform.position, followTransform.position,
+                        followSpeed * Time.deltaTime);
+                }
+            }
+
+            ToggleOccludingObjectsVisibilityOff();
+        }
+        else
+        {
+            transform.position = Vector3.Slerp(transform.position, transform.position + moveVector, moveSpeed * Time.deltaTime);
+        }
     }
 
     private void HandleRotation()

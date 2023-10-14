@@ -5,7 +5,6 @@ using Cinemachine;
 
 public class CameraController : MonoBehaviour
 {
-
     private const float MIN_FOLLOW_Y_OFFSET = 2f;
     private const float MAX_FOLLOW_Y_OFFSET = 15f;
 
@@ -39,18 +38,17 @@ public class CameraController : MonoBehaviour
 
     private void HandleMovement()
     {
-        // transform.position = Vector3.Slerp(transform.position, followTransform.position, followSpeed * Time.deltaTime);
         ToggleOccludingObjectsVisibilityOff();
         Vector2 inputMoveDir = InputManager.Instance.GetCameraMoveVector(out var mouseButtonHeld);
-        
+
         float moveSpeed = 10f;
         var moved = false;
-        
+
         Vector3 moveVector = transform.forward * inputMoveDir.y + transform.right * inputMoveDir.x;
 
         if (moveVector == Vector3.zero)
         {
-            if(!mouseButtonHeld)
+            if (!mouseButtonHeld)
             {
                 if (Mathf.Abs(Vector3.Distance(transform.position, followTransform.position)) > 1f)
                 {
@@ -68,7 +66,8 @@ public class CameraController : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.Slerp(transform.position, transform.position + moveVector, moveSpeed * Time.deltaTime);
+            transform.position = Vector3.Slerp(transform.position, transform.position + moveVector,
+                moveSpeed * Time.deltaTime);
         }
     }
 
@@ -98,7 +97,7 @@ public class CameraController : MonoBehaviour
     {
         return targetFollowOffset.y;
     }
-    
+
     private void ToggleOccludingObjectsVisibilityOff()
     {
         if (_raycastHitObjects.Count > 0)
@@ -107,9 +106,10 @@ public class CameraController : MonoBehaviour
             {
                 raycastHitObject.Show();
             }
+
             _raycastHitObjects.Clear();
         }
-        
+
         Ray ray = Camera.main.ScreenPointToRay(InputManager.Instance.GetMouseScreenPosition());
         var cameraPosition = Camera.main.transform.position;
         var direction = followTransform.position - cameraPosition;
@@ -131,7 +131,5 @@ public class CameraController : MonoBehaviour
                 objectVisibility.Hide();
             }
         }
-            
     }
-
 }

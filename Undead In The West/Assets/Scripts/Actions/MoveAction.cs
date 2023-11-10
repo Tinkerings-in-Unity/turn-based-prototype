@@ -24,6 +24,7 @@ public class MoveAction : BaseAction
     private bool isChangingFloors;
     private float differentFloorsTeleportTimer;
     private float differentFloorsTeleportTimerMax = .5f;
+    private List<GridPosition> _targetGridPosition = new List<GridPosition>();
 
     public override void Setup()
     {
@@ -100,19 +101,38 @@ public class MoveAction : BaseAction
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
-        List<GridPosition> pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetGridPosition(), gridPosition, out int pathLength);
+        // var pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetGridPosition(), gridPosition, out int pathLength);
+
+        currentPositionIndex = 0;
+        // positionList = new List<Vector3>();
+        //
+        // foreach (GridPosition pathGridPosition in pathGridPositionList)
+        // {
+        //     positionList.Add(LevelGrid.Instance.GetWorldPosition(pathGridPosition));
+        // }
+
+        OnStartMoving?.Invoke(this, EventArgs.Empty);
+
+        ActionStart(onActionComplete);
+    }
+    
+    public void UpdateTargetPositionList(GridPosition gridPosition)
+    {
+        var pathGridPositionList = Pathfinding.Instance.FindPath(unit.GetGridPosition(), gridPosition, out int pathLength);
 
         currentPositionIndex = 0;
         positionList = new List<Vector3>();
+        _targetGridPosition = pathGridPositionList;
 
         foreach (GridPosition pathGridPosition in pathGridPositionList)
         {
             positionList.Add(LevelGrid.Instance.GetWorldPosition(pathGridPosition));
         }
-
-        OnStartMoving?.Invoke(this, EventArgs.Empty);
-
-        ActionStart(onActionComplete);
+    }
+    
+    public List<GridPosition> GetTargetGridPositionList()
+    {
+        return _targetGridPosition;
     }
 
     public override List<GridPosition> GetValidActionGridPositionList()

@@ -2284,6 +2284,57 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c96973933a83c7a49915681965a03a83, type: 3}
+--- !u!1 &341066468
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 341066470}
+  - component: {fileID: 341066469}
+  m_Layer: 0
+  m_Name: LineRendererControllerPooler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &341066469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 341066468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b7277539b95c0d45895792ecc99ce66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MutualizeWaitingPools: 0
+  NestWaitingPool: 1
+  NestUnderThis: 1
+  GameObjectToPool: {fileID: 621919370274136457, guid: 42a2f2d0ff3bed641b03e79de3717f68,
+    type: 3}
+  PoolSize: 0
+  PoolCanExpand: 1
+--- !u!4 &341066470
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 341066468}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 31
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &341106087
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8595,6 +8646,11 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: 676403002645de141824ed7a33cf298c, type: 2}
   - gridVisualType: 3
     material: {fileID: 2100000, guid: 33d0f3425c63f0d4182ec071ab56fd38, type: 2}
+  - gridVisualType: 5
+    material: {fileID: 2100000, guid: 256459d4f9d3ae64f87de90659b04d4b, type: 2}
+  lineRendererControllerPrefab: {fileID: 8312071779182532933, guid: 42a2f2d0ff3bed641b03e79de3717f68,
+    type: 3}
+  lineRendererControllerPooler: {fileID: 341066469}
 --- !u!4 &853526371
 Transform:
   m_ObjectHideFlags: 0
@@ -15156,6 +15212,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 715756099}
     m_Modifications:
+    - target: {fileID: -5639441539148911859, guid: 69b98c41becc4ae4099f1eba6797785b,
+        type: 3}
+      propertyPath: range
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3935794340981501179, guid: 69b98c41becc4ae4099f1eba6797785b,
+        type: 3}
+      propertyPath: range
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6524592399208437847, guid: 69b98c41becc4ae4099f1eba6797785b,
+        type: 3}
+      propertyPath: range
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6920165730332424967, guid: 69b98c41becc4ae4099f1eba6797785b,
+        type: 3}
+      propertyPath: range
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7596500971379310254, guid: 69b98c41becc4ae4099f1eba6797785b,
         type: 3}
       propertyPath: m_LocalPosition.x

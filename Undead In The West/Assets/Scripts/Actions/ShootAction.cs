@@ -28,7 +28,6 @@ public class ShootAction : BaseAction
     [SerializeField] private LayerMask obstaclesLayerMask;
 
     private State state;
-    private int _range;
     private int _damage;
     private float stateTimer;
     private Unit targetUnit;
@@ -75,7 +74,7 @@ public class ShootAction : BaseAction
         _weapon = unit.GetSelectedWeapon();
 
         _damage = _weapon.GetDamage();
-        _range = _weapon.GetRange();
+        range = _weapon.GetRange();
     }
 
     private void NextState()
@@ -131,11 +130,11 @@ public class ShootAction : BaseAction
     {
         List<GridPosition> validGridPositionList = new List<GridPosition>();
 
-        for (int x = -_range; x <= _range; x++)
+        for (int x = -range; x <= range; x++)
         {
-            for (int z = -_range; z <= _range; z++)
+            for (int z = -range; z <= range; z++)
             {
-                for (int floor = -_range; floor <= _range; floor++)
+                for (int floor = -range; floor <= range; floor++)
                 {
                     GridPosition offsetGridPosition = new GridPosition(x, z, floor);
                     GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
@@ -146,7 +145,7 @@ public class ShootAction : BaseAction
                     }
 
                     int testDistance = Mathf.Abs(x) + Mathf.Abs(z);
-                    if (testDistance > _range)
+                    if (testDistance > range)
                     {
                         continue;
                     }
@@ -207,7 +206,7 @@ public class ShootAction : BaseAction
 
     public int GetMaxShootDistance()
     {
-        return _range;
+        return range;
     }
 
     public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)

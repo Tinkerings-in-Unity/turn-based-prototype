@@ -20,7 +20,6 @@ public class SwordAction : BaseAction
         SwingingSwordAfterHit,
     }
 
-    private int maxSwordDistance = 1;
     private State state;
     private float stateTimer;
     private Unit targetUnit;
@@ -96,9 +95,9 @@ public class SwordAction : BaseAction
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 
-        for (int x = -maxSwordDistance; x <= maxSwordDistance; x++)
+        for (int x = -range; x <= range; x++)
         {
-            for (int z = -maxSwordDistance; z <= maxSwordDistance; z++)
+            for (int z = -range; z <= range; z++)
             {
                 GridPosition offsetGridPosition = new GridPosition(x, z, 0);
                 GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
@@ -142,9 +141,9 @@ public class SwordAction : BaseAction
         ActionStart(onActionComplete);
     }
 
-    public int GetMaxSwordDistance()
+    public int Getrange()
     {
-        return maxSwordDistance;
+        return range;
     }
     
     public Unit GetTargetUnit()

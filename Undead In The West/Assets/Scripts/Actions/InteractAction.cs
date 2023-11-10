@@ -6,8 +6,6 @@ using UnityEngine;
 public class InteractAction : BaseAction
 {
 
-    private int maxInteractDistance = 1;
-
     public override void Setup()
     {
     }
@@ -40,9 +38,9 @@ public class InteractAction : BaseAction
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 
-        for (int x = -maxInteractDistance; x <= maxInteractDistance; x++)
+        for (int x = -range; x <= range; x++)
         {
-            for (int z = -maxInteractDistance; z <= maxInteractDistance; z++)
+            for (int z = -range; z <= range; z++)
             {
                 GridPosition offsetGridPosition = new GridPosition(x, z, 0);
                 GridPosition testGridPosition = unitGridPosition + offsetGridPosition;

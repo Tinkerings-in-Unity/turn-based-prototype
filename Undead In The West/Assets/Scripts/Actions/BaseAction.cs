@@ -7,6 +7,8 @@ public abstract class BaseAction : MonoBehaviour
 {
 
     [SerializeField] protected List<int> cameraPreferenceList;
+    [SerializeField] protected int range;
+
     
     public static event EventHandler OnAnyActionStarted;
     public static event EventHandler OnAnyActionCompleted;
@@ -64,6 +66,11 @@ public abstract class BaseAction : MonoBehaviour
     public Unit GetUnit()
     {
         return unit;
+    }
+    
+    public int GetRange()
+    {
+        return range;
     }
 
     public EnemyAIAction GetBestEnemyAIAction()

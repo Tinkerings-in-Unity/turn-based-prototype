@@ -10,8 +10,6 @@ public class GrenadeAction : BaseAction
     [SerializeField] private Transform grenadeProjectilePrefab;
 
 
-    private int maxThrowDistance = 7;
-
     private void Update()
     {
         if (!isActive)
@@ -45,9 +43,9 @@ public class GrenadeAction : BaseAction
 
         GridPosition unitGridPosition = unit.GetGridPosition();
 
-        for (int x = -maxThrowDistance; x <= maxThrowDistance; x++)
+        for (int x = -range; x <= range; x++)
         {
-            for (int z = -maxThrowDistance; z <= maxThrowDistance; z++)
+            for (int z = -range; z <= range; z++)
             {
                 GridPosition offsetGridPosition = new GridPosition(x, z, 0);
                 GridPosition testGridPosition = unitGridPosition + offsetGridPosition;
@@ -58,7 +56,7 @@ public class GrenadeAction : BaseAction
                 }
 
                 int testDistance = Mathf.Abs(x) + Mathf.Abs(z);
-                if (testDistance > maxThrowDistance)
+                if (testDistance > range)
                 {
                     continue;
                 }

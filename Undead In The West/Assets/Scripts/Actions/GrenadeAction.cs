@@ -6,9 +6,8 @@ using UnityEngine;
 public class GrenadeAction : BaseAction
 {
 
-
     [SerializeField] private Transform grenadeProjectilePrefab;
-
+    [SerializeField] private LayerMask obstaclesLayerMask;
 
     private void Update()
     {
@@ -60,6 +59,21 @@ public class GrenadeAction : BaseAction
                 {
                     continue;
                 }
+                
+                var unitWorldPosition = LevelGrid.Instance.GetWorldPosition(unitGridPosition);
+                var targetTileWorldPosition = LevelGrid.Instance.GetWorldPosition(testGridPosition );
+                var throwDir = (targetTileWorldPosition - unitWorldPosition).normalized;
+
+                float unitShoulderHeight = 1.7f;
+                if (Physics.Raycast(
+                        unitWorldPosition + Vector3.up * unitShoulderHeight,
+                        throwDir,
+                        Vector3.Distance(unitWorldPosition, targetTileWorldPosition),
+                        obstaclesLayerMask))
+                {
+                    // Blocked by an Obstacle
+                    continue;
+                }
 
                 validGridPositionList.Add(testGridPosition);
             }
@@ -67,6 +81,33 @@ public class GrenadeAction : BaseAction
 
         return validGridPositionList;
     } 
+    
+    public List<GridPosition> GetTargetGridPositionList()
+    {
+        var validGridPositionList = GetValidActionGridPositionList();
+        var targetGridPositionList = new List<GridPosition>();
+        
+        foreach (var gridPosition in validGridPositionList)
+        {
+            if (!LevelGrid.Instance.HasAnyUnitOnGridPosition(gridPosition))
+            {
+                // Grid Position is empty, no Unit
+                continue;
+            }
+
+            Unit targetUnit = LevelGrid.Instance.GetUnitAtGridPosition(gridPosition);
+
+            if (targetUnit.IsEnemy() == unit.IsEnemy())
+            {
+                // Both Units on same 'team'
+                continue;
+            }
+            
+            targetGridPositionList.Add(gridPosition);
+        }
+
+        return targetGridPositionList;
+    }
 
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {

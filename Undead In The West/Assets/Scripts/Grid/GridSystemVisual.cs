@@ -10,7 +10,6 @@ public class GridSystemVisual : MonoBehaviour
 
     public static GridSystemVisual Instance { get; private set; }
 
-
     [Serializable]
     public struct GridVisualTypeMaterial
     {
@@ -28,18 +27,18 @@ public class GridSystemVisual : MonoBehaviour
         Green
     }
 
-    [SerializeField] private Transform gridSystemVisualSinglePrefab;
+    [SerializeField] private float floorHeight;
     [SerializeField] private List<GridVisualTypeMaterial> gridVisualTypeMaterialList;
-    [SerializeField] private LineRendererController lineRendererControllerPrefab;
     [SerializeField] private MMSimpleObjectPooler lineRendererControllerPooler;
+    [SerializeField] private MMSimpleObjectPooler gridSystemVisualPooler;
 
     private UnitActionSystem _unitActionSystem;
-    private GridSystemVisualSingle[,,] gridSystemVisualSingleArray;
     private bool _actionIsBusy;
     private BaseAction _selectedAction;
     private Unit _selectedUnit;
     private List<LineRendererController> _outlineLines = new List<LineRendererController>();
-   
+    private List<GridSystemVisualSingle> _gridSystemVisuals = new List<GridSystemVisualSingle>();
+
 
     private void Awake()
     {
@@ -49,32 +48,13 @@ public class GridSystemVisual : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
-       
+
     }
 
     private void Start()
     {
-        gridSystemVisualSingleArray = new GridSystemVisualSingle[LevelGrid.Instance.GetWidth(), LevelGrid.Instance.GetHeight(),
-            LevelGrid.Instance.GetFloorAmount()
-        ];
-
-        for (int x = 0; x < LevelGrid.Instance.GetWidth(); x++)
-        {
-            for (int z = 0; z < LevelGrid.Instance.GetHeight(); z++)
-            {
-                for (int floor = 0; floor < LevelGrid.Instance.GetFloorAmount(); floor++)
-                {
-                    GridPosition gridPosition = new GridPosition(x, z, floor);
-
-                    Transform gridSystemVisualSingleTransform =
-                        Instantiate(gridSystemVisualSinglePrefab, LevelGrid.Instance.GetWorldPosition(gridPosition), Quaternion.identity);
-
-                    gridSystemVisualSingleArray[x, z, floor] = gridSystemVisualSingleTransform.GetComponent<GridSystemVisualSingle>();
-                }
-            }
-        }
-        
         _unitActionSystem = UnitActionSystem.Instance;
 
         _unitActionSystem.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
@@ -89,22 +69,12 @@ public class GridSystemVisual : MonoBehaviour
     public void HideAllGridPosition()
     {
         _outlineLines.ForEach(l => l.gameObject.GetComponent<MMPoolableObject>().Destroy());
-        
-        for (int x = 0; x < LevelGrid.Instance.GetWidth(); x++)
-        {
-            for (int z = 0; z < LevelGrid.Instance.GetHeight(); z++)
-            {
-                for (int floor = 0; floor < LevelGrid.Instance.GetFloorAmount(); floor++)
-                {
-                    gridSystemVisualSingleArray[x, z, floor].Hide();
-                }
-            }
-        }
+       _gridSystemVisuals.ForEach(g => g.gameObject.GetComponent<MMPoolableObject>().Destroy());
     }
 
-    private void ShowGridPositionRange(GridPosition gridPosition, int range, GridVisualType gridVisualType)
+    private List<GridPosition> GetGridPositionRange(GridPosition gridPosition, int range)
     {
-        List<GridPosition> gridPositionList = new List<GridPosition>();
+        var gridPositionList = new List<GridPosition>();
 
         for (int x = -range; x <= range; x++)
         {
@@ -127,12 +97,12 @@ public class GridSystemVisual : MonoBehaviour
             }
         }
 
-        ShowGridPositionList(gridPositionList, gridVisualType);
+        return gridPositionList;
     }
 
-    private void ShowGridPositionRangeSquare(GridPosition gridPosition, int range, GridVisualType gridVisualType)
+    private List<GridPosition> GetGridPositionRangeSquare(GridPosition gridPosition, int range)
     {
-        List<GridPosition> gridPositionList = new List<GridPosition>();
+        var gridPositionList = new List<GridPosition>();
 
         for (int x = -range; x <= range; x++)
         {
@@ -149,15 +119,26 @@ public class GridSystemVisual : MonoBehaviour
             }
         }
 
-        ShowGridPositionList(gridPositionList, gridVisualType);
+        return gridPositionList;
+    }
+    
+    private void DrawGridSystemVisual(Vector3 worldPosition, GridVisualType gridVisualType)
+    {
+        var obj = gridSystemVisualPooler.GetPooledGameObject();
+        obj.SetActive(true);
+        obj.transform.position = worldPosition;
+        var gridSystemVisual = obj.GetComponent<GridSystemVisualSingle>();
+        gridSystemVisual.Show(GetGridVisualTypeMaterial(gridVisualType));
+        _gridSystemVisuals.Add(gridSystemVisual);
     }
 
     public void ShowGridPositionList(List<GridPosition> gridPositionList, GridVisualType gridVisualType)
     {
-        foreach (GridPosition gridPosition in gridPositionList)
+        var gridPositions = ConvertGridPositionListToVector3(gridPositionList);
+        
+        foreach (var position in gridPositions)
         {
-            gridSystemVisualSingleArray[gridPosition.x, gridPosition.z, gridPosition.floor].
-                Show(GetGridVisualTypeMaterial(gridVisualType));
+            DrawGridSystemVisual(position, gridVisualType);
         }
     }
 
@@ -170,41 +151,49 @@ public class GridSystemVisual : MonoBehaviour
         _selectedAction.Setup();
 
         var gridVisualType = GridVisualType.White;
+        var gridPositionList = new List<GridPosition>();
+        var targetGridPositionList = new List<GridPosition>();
 
         switch (_selectedAction)
         {
             // default:
             case MoveAction moveAction:
-                DrawRangeLines();
-                ShowGridPositionList(moveAction.GetTargetGridPositionList(), GridVisualType.Green);
-                return;
+                gridVisualType = GridVisualType.Green;
+                gridPositionList = _selectedAction.GetValidActionGridPositionList();
+                targetGridPositionList = moveAction.GetTargetGridPositionList();
+                break;
             case SpinAction spinAction:
                 gridVisualType = GridVisualType.Blue;
                 break;
             case ShootAction shootAction:
                 gridVisualType = GridVisualType.Red;
-
-                ShowGridPositionRange(_selectedUnit.GetGridPosition(), shootAction.GetRange(), GridVisualType.RedSoft);
+                gridPositionList = GetGridPositionRange(_selectedUnit.GetGridPosition(), shootAction.GetRange());
+                targetGridPositionList = _selectedAction.GetValidActionGridPositionList();
                 break;
             case GrenadeAction grenadeAction:
                 gridVisualType = GridVisualType.Yellow;
+                gridPositionList = _selectedAction.GetValidActionGridPositionList();
+                targetGridPositionList = grenadeAction.GetTargetGridPositionList();
                 break;
             case SwordAction swordAction:
                 gridVisualType = GridVisualType.Red;
-
-                ShowGridPositionRangeSquare(_selectedUnit.GetGridPosition(), swordAction.GetRange(), GridVisualType.RedSoft);
+                gridPositionList = GetGridPositionRangeSquare(_selectedUnit.GetGridPosition(), swordAction.GetRange());
+                targetGridPositionList = _selectedAction.GetValidActionGridPositionList();
                 break;
             case InteractAction interactAction:
                 gridVisualType = GridVisualType.Blue;
+                gridPositionList = _selectedAction.GetValidActionGridPositionList();
                 break;
         }
+        
+        DrawRangeLines(gridPositionList);
 
-        ShowGridPositionList(_selectedAction.GetValidActionGridPositionList(), gridVisualType);
+        ShowGridPositionList(targetGridPositionList, gridVisualType);
     }
-    
+
     private void HighlightGridCells()
     {
-        
+
     }
 
     private void UnitActionSystem_OnBusyChanged(object sender, bool e)
@@ -213,7 +202,8 @@ public class GridSystemVisual : MonoBehaviour
         if (e)
         {
             HideAllGridPosition();
-        } else
+        }
+        else
         {
             UpdateGridVisual();
         }
@@ -223,12 +213,12 @@ public class GridSystemVisual : MonoBehaviour
     {
         UpdateGridVisual();
     }
-    
+
     private void UnitActionSystem_OnSelectedEquipmentActionChanged(object sender, EventArgs e)
     {
         UpdateGridVisual();
     }
-    
+
     private void UnitActionSystem_OnSelectedActionUpdated(object sender, EventArgs e)
     {
         UpdateGridVisual();
@@ -256,55 +246,16 @@ public class GridSystemVisual : MonoBehaviour
     private List<Vector3> ConvertGridPositionListToVector3(List<GridPosition> list)
     {
         var vectorList = new List<Vector3>();
-        
+        var yOffset = 0.03f;
+
         foreach (var gridPosition in list)
         {
-            vectorList.Add(new Vector3(gridPosition.x, 0.03f,  gridPosition.z));
+            vectorList.Add(new Vector3(gridPosition.x, (gridPosition.floor * floorHeight) + yOffset, gridPosition.z));
         }
 
         return vectorList;
     }
-    
-    // private void OnDrawGizmos()
-    // {
-    //     if(_actionIsBusy || _selectedAction == null)
-    //     {
-    //         return;
-    //     }
-    //
-    //
-    //     var area = ConvertGridPositionListToVector3(_selectedAction.GetValidActionGridPositionList());
-    //     var cellSize = LevelGrid.Instance.GetCellSize();
-    //
-    //     var offsetVector = new Vector3(-cellSize / 2, 0f, -cellSize / 2);
-    //
-    //     Gizmos.color = Color.white;
-    //     foreach (var tilePos in area)
-    //     {
-    //         var tilePosWithOffset = tilePos + offsetVector;
-    //         
-    //         if (!area.Contains(tilePos + Vector3.left))
-    //         {
-    //             Gizmos.DrawLine(tilePosWithOffset, tilePosWithOffset + Vector3.forward);
-    //         }
-    //
-    //         if (!area.Contains(tilePos + Vector3.back))
-    //         {
-    //             Gizmos.DrawLine(tilePosWithOffset, tilePosWithOffset + Vector3.right);
-    //         }
-    //
-    //         if (!area.Contains(tilePos + Vector3.right))
-    //         {
-    //             Gizmos.DrawLine(tilePosWithOffset+ Vector3.right, tilePosWithOffset + new Vector3(1, 0, 1));
-    //         }
-    //
-    //         if (!area.Contains(tilePos + Vector3.forward))
-    //         {
-    //             Gizmos.DrawLine(tilePosWithOffset + Vector3.forward, tilePosWithOffset + new Vector3(1, 0, 1));
-    //         }
-    //     }
-    //     
-    // }
+
 
     private void DrawLine(Vector3 start, Vector3 end)
     {
@@ -314,10 +265,12 @@ public class GridSystemVisual : MonoBehaviour
         lineRendererController.Draw(start, end);
         _outlineLines.Add(lineRendererController);
     }
-    
-    private void DrawRangeLines()
+
+    private void DrawRangeLines(List<GridPosition> actionGridPositionList = null)
     {
-        var area = ConvertGridPositionListToVector3(_selectedAction.GetValidActionGridPositionList());
+        var gridPositionList = actionGridPositionList ?? _selectedAction.GetValidActionGridPositionList();
+        
+        var area = ConvertGridPositionListToVector3(gridPositionList);
         var cellSize = LevelGrid.Instance.GetCellSize();
 
         var offsetVector = new Vector3(-cellSize / 2, 0f, -cellSize / 2);
@@ -325,7 +278,7 @@ public class GridSystemVisual : MonoBehaviour
         foreach (var tilePos in area)
         {
             var tilePosWithOffset = tilePos + offsetVector;
-            
+
             if (!area.Contains(tilePos + Vector3.left))
             {
                 DrawLine(tilePosWithOffset, tilePosWithOffset + Vector3.forward);
@@ -338,7 +291,7 @@ public class GridSystemVisual : MonoBehaviour
 
             if (!area.Contains(tilePos + Vector3.right))
             {
-                DrawLine(tilePosWithOffset+ Vector3.right, tilePosWithOffset + new Vector3(1, 0, 1));
+                DrawLine(tilePosWithOffset + Vector3.right, tilePosWithOffset + new Vector3(1, 0, 1));
             }
 
             if (!area.Contains(tilePos + Vector3.forward))
@@ -347,19 +300,4 @@ public class GridSystemVisual : MonoBehaviour
             }
         }
     }
-    
-    // private void LateUpdate() {
-    //     if (_outlinePoints.Count >= 2)
-    //     {
-    //         _lineRenderer.positionCount = _outlinePoints.Count;
-    //         
-    //         var points = _outlinePoints.ToList();
-    //         for (int i = 0; i < points.Count; i++) {
-    //             Vector3 position = points[i];
-    //             // position += new Vector3(0, 0, 5);
-    //
-    //             _lineRenderer.SetPosition(i, position);
-    //         }
-    //     }
-    // }
 }
